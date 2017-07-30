@@ -22,23 +22,23 @@ std::tuple<int, int> parse_line(const std::string& line) {
     // Convert m and n to integers 
     std::stringstream convert(m_str);
     int m, n;
-    if (!(convert >> m)) 
-       std::cout << "error - bad input\n";
+    if (!(convert >> m)) {
+        std::cout << "error - bad input.\nFailed to convert: " << convert.str() << std::endl;
+    }
     convert.clear();
     convert.str(n_str);
-    if (!(convert >> n))
-        std::cout << "error - bad input\n";
+    if (!(convert >> n)) {
+        std::cout << "error - bad input.\nFailed to convert: " << convert.str() << std::endl;
+    }
     
     return std::make_tuple(m, n);    
 }
 
-std::vector<std::tuple<int, int>> get_input(const int n) {
-    std::ios::sync_with_stdio(false);
+std::vector<std::tuple<int, int>> parse_lines(const std::vector<std::string>& lines) {
+    int n = lines.size();
     std::vector<std::tuple<int, int>> result(n);
     for (int i = 0; i < n; i++) {
-        std::string line;
-        getline(std::cin, line);
-        result[i] = parse_line(line);
+        result[i] = parse_line(lines[i]);
     }
     return result;
 }
@@ -72,8 +72,14 @@ int main(int argc, char* argv[]) {
     ss >> num_lines;
     
     // Read input
-    std::vector<std::tuple<int, int>> input_tups = get_input(num_lines);
-
+    std::vector<std::string> lines(num_lines);
+    for (int i = 0; i < num_lines; i++) {
+        std::string line;
+        getline(std::cin, line);
+        lines[i] = line;
+    }
+    std::vector<std::tuple<int, int>> input_tups = parse_lines(lines);
+    
     // Print boards
     print_boards(input_tups);
 
