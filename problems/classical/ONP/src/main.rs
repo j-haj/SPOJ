@@ -1,4 +1,4 @@
-use std::collections::LinkedList;
+use std::collections::{BTreeMap, LinkedList};
 use std::io;
 
 /// Implements the [Shunting-yard](https://en.wikipedia.org/wiki/Shunting-yard_algorithm)
@@ -15,24 +15,37 @@ use std::io;
 /// the output of `postifx_to_infix(expr)` would be:
 /// "abc*+"
 fn postifx_to_infix<'a>(expr: &'a str) -> &'a str {
-    let mut output_queue = LinkedList::new();
+    let mut output = String::from("");
     let mut operator_stack = LinkedList::new();
 
-    for c in expr.chars() {
+    let mut operator_prec = BTreeMap::new();
+    operator_prec.insert('(', 4);
+    operator_prec.insert('^', 3);
+    operator_prec.insert('/', 2);
+    operator_prec.insert('*', 2);
+    operator_prec.insert('+', 1);
+    operator_prec.insert('-', 1);
+
+    for &c in expr.chars() {
         match c {
-            '+' => println!("plus"),
-            '-' => continue,
-            '/' => continue,
-            '*' => continue,
-            '^' => continue,
-            '(' => operator_stack.push_back(c),
-            ')' => continue,
-            _ if c.is_alphabetic() => output_queue.push_back(c),
+            Ok(c) if operator_prec.contains_key(c) => {
+                while operator_prec[operator_stack.front()] > operator_prec[c] {
+                    output.push(operator_stack.pop_front());
+                }
+                operator_stack.push_front(c);
+            },
+            Ok(c) if c.is_alphabetic() => output.push(c),
+            Ok('(') => operator_stack.push_back('('),
+            Ok(')') => {
+                while operator_stack.front() != '(' {
+                    output.push(operator_stack.pop_front());
+                }
+                operator_stack.pop_front();
+            },
             _ => panic!("Encountered unknown character"),
         }
-        println!("Character {}", &c);
     }
-    "output"
+    output.as_str()
 }
 
 fn main() {
